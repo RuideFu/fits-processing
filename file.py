@@ -1,6 +1,5 @@
 from astropy.io import fits
 from util import correction
-
 # Read in files
 b_image = fits.open('47_tuc_7165651_R_0010_reduced.fits')
 g_image = fits.open('47_tuc_7165651_V_0008_reduced.fits')
