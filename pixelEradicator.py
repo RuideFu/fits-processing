@@ -28,14 +28,14 @@ def pixel_eradicator(M, image):
             pixel_set.extend(pixel)
             pixel_median = median(pixel_set)
             # calculate sigma
-            N = len(pixel_set)
+            absdev = [abs(pixel_median - pixel) for pixel in pixel_set]
+            absdev = sorted(absdev)
+            N = absdev[len(absdev)]
             correction = 1 + (1.7 / N)
             i = floor(0.683 * N)
             i_minus = 0.683 * (N - 1)
-            absdev = abs(pixel_median - i)
-            absdev_plus = abs(pixel_median - (i + 1))
 
-            sigma = (absdev + ((absdev_plus - absdev) * (i_minus - floor(i_minus)))) * correction
+            sigma = (absdev[i] + ((absdev[i + 1] - absdev[i]) * (i_minus - floor(i_minus)))) * correction
 
             rejection_factor = sigma * sqrt(2) * erf(1 - 0.5/N) ** -1
 
