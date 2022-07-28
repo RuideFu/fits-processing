@@ -27,7 +27,6 @@ def pixel_eradicator(M, image):
             # populate sets with the middle pixel and find the median
             pixel_set.extend(pixel)
             pixel_median = median(pixel_set)
-            print(pixel_set, pixel_median)
             # calculate sigma
             N = len(pixel_set)
             correction = 1 + (1.7 / N)
@@ -41,9 +40,10 @@ def pixel_eradicator(M, image):
             rejection_factor = sigma * sqrt(2) * erf(1 - 0.5/N) ** -1
 
             if abs(pixel_median - pixel) > rejection_factor:
-                data[row][col] = 0
+                data[row][col] = 100
+                print('think fast chucklenuts')
             else:
-                data[row][col] = 1
+                data[row][col] = 0
 
     # Apply new data
     image[0].data = data
