@@ -1,5 +1,4 @@
-from math import erf
-
+from scipy import special
 from numpy import median, floor, sqrt
 
 
@@ -28,8 +27,9 @@ def pixel_eradicator(M, image):
             pixel_set.extend(pixel)
             pixel_median = median(pixel_set)
             # calculate sigma
-            absdev = [abs(pixel_median - pixel) for pixel in pixel_set]
+            absdev = [abs(pixel_median - pixel_set[p]) for p in range(len(pixel_set))]
             absdev = sorted(absdev)
+            # print(absdev)
             N = len(absdev)
             correction = 1 + (1.7 / N)
             i = floor(0.683 * N)
@@ -37,14 +37,15 @@ def pixel_eradicator(M, image):
 
             sigma = (absdev[int(i) - 1] + ((absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus)))) * correction
 
-            rejection_factor = sigma * sqrt(2) * erf(1 - 0.5/N) ** -1
-
+            rejection_factor = sigma * sqrt(2) * special.erfinv(1 - 0.5/N)
+            # print('rejection', rejection_factor)
+            # print('pixel', abs(pixel_median - pixel))
             if abs(pixel_median - pixel) > rejection_factor:
                 data[row][col] = 100
-                print('think fast chucklenuts')
+                # print('think fast chucklenuts')
             else:
                 data[row][col] = 0
-
+                # print('go ahead and cry, baby')
     # Apply new data
     image[0].data = data
 

@@ -1,6 +1,7 @@
 from astropy.io import fits
 from pixelEradicator import pixel_eradicator
 # Read in files
+# have to do one at  time for some reason
 image = fits.open('brokenColumnP6.fits')
 # eradicate the bad pixels, M = 1, 2, 3, 4, 5
 [output1] = pixel_eradicator(1, image)
