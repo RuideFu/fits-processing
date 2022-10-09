@@ -4,8 +4,6 @@ import numpy as np
 from scipy import special
 from numpy import median, floor, sqrt
 
-## IMPORTANT you are an idiot, write the flagged pixels into a new image file you are overwriting you are stupid!!!!
-
 
 def pixel_eradicator(M, image, image2):
     # read in the images and get their data
@@ -14,6 +12,12 @@ def pixel_eradicator(M, image, image2):
     row_count = data.shape[0]
     col_count = data.shape[1]
     flaggedPixels = 0
+    # print('Dan Pixel: ', data[499][1158])
+    # print('thang: ', rejectionGenerator([75, 73, 88, 85, -185, 702, -193, 106, 84, 71, 98, 79]))
+    # special_set = [data[160][496], data[159][496], data[158][496], data[157][496], data[156][496], data[155][496], data[161][496], data[162][496], data[163][496], data[164][496], data[165][496]]
+    # special_set = abs(special_set - median(special_set))
+    # special_set = sorted(special_set)
+    # print('Rejection:', rejectionGenerator(special_set), 'Set:', special_set)
     # move through each pixel
     for row in range(row_count):
         for col in range(col_count):
@@ -29,83 +33,67 @@ def pixel_eradicator(M, image, image2):
                     pixel_set.append(data[row][col + j])
                 except:
                     continue
-
             # populate sets with the middle pixel and find the median
             pixel_set.extend(pixel)
-            # pick up later here 08-21-2022 -- Do not need to make pixel memory, just loop through the set
             pixel_median = median(pixel_set)
             # populate set of absolute deviations
             absdev = abs(pixel_median - pixel_set)
             absdev = sorted(absdev)
-            # print(absdev)
-
             # retrieve the rejection factor from the original absdev set
             rejection_factor = rejectionGenerator(absdev)
-            # # now we decide whether to reject the pixel in the middle or not
-            #
-            # if abs(pixel_median - pixel) > rejection_factor:
-            #       data[row][col] = 100
-            #       print('think fast chucklenuts')
-            # else:
-            #     data[row][col] = 0
-            # print('go ahead and cry, baby')
-
-            # dan wants us to try a new way, now we are going to move through the absdev set from high to low and see if
-            # anything gets rejected, if anything around our target is rejected we cast them out and recalculate, if our
-            # target is rejected too, we flag it and move on
+            ##identified candidate for problem child
+            # if pixel == data[588][1160]:
+            #     print('Pixel Set:', pixel_set, 'Pixel Median', pixel_median, 'absdev: ', absdev, 'Pixel: ', pixel)
             swag = 0
             while swag == 0:
-                # problem -- pixel median not updating correctly with pixel, go get some lunch
-                # Here we are mass rejecting pixels that do not make the cut, but we need to switch to rejecting only
-                # one at a time
-                # for p in range(len(absdev)):
-                #     # print('myasshurts', len(absdev))
-                #     if abs(pixel_median - absdev[int(p)]) < rejection_factor:
-                #         flaggedSet.append(absdev[int(p)])
-                # only remove the pixel with the highest deviation from absdev and repeat
-                entryLength = len(pixel_set)
+                # entryLength = len(pixel_set)
                 pixel_set = sorted(pixel_set)
+                pixel_median = median(pixel_set)
+                # populate set of absolute deviations
+                rawDev = (pixel_set - pixel_median)
+                absdev = abs(rawDev)
+                absdev = sorted(absdev)
+                # if pixel == data[588][1160]:
+                #     print('Reject Factor: ', rejectionGenerator(absdev))
+                #     print('Pixel: ', pixel, 'Pixel Set', pixel_set)
+                #     print(absdev[-1], abs(pixel - pixel_median))
                 if abs(absdev[-1]) > rejection_factor:
-                    if (absdev[-1]) == abs(pixel - pixel_median):
-                        swag = 1
-                        dataTemp[row][col] = 30 * np.pi
+                    if absdev[-1] == abs(pixel - pixel_median):
+                        # if pixel == data[597][1161]:
+                        #     print('Line 55')
+                        dataTemp[row][col] = 100
                         flaggedPixels += 1
-                        print(absdev, abs(pixel - pixel_median), 'flagged from priority removal')
+                        swag = 1
+                        # print(absdev, abs(pixel - pixel_median), 'Row:', row, 'Col:', col, rejection_factor, rejectionGenerator(absdev))
                         continue
                     else:
-                        pixel_set.pop(-1)
-                    # print(absdev)
+                        for i in range(len(rawDev)):
+                            if abs(rawDev[i]) == absdev[-1]:
+                                annihilate = i
+                        pixel_set.pop(annihilate)
+
                 else:
                     dataTemp[row][col] = 0
                     swag = 1
                     continue
-                exitLength = len(pixel_set)
-                pixel_median = median(pixel_set)
-                # populate set of absolute deviations
-                absdev = abs(pixel_median - pixel_set)
-                absdev = sorted(absdev)
-                # print(absdev)
+                # exitLength = len(pixel_set)
                 if len(absdev) > 1:
                     rejection_factor = rejectionGenerator(absdev)
                 else:
-                    dataTemp[row][col] = 30 * np.pi
+                    dataTemp[row][col] = 100
                     flaggedPixels += 1
                     swag = 1
-                    print(absdev, abs(pixel - pixel_median), 'flagged from reduction')
+                    # print(absdev, abs(pixel - pixel_median), 'flagged from reduction')
                     continue
-                if entryLength == exitLength:
-                    if abs(pixel_median - pixel) > rejection_factor:
-                        dataTemp[row][col] = 30 * np.pi
-                        flaggedPixels += 1
-                        print(absdev, abs(pixel - pixel_median), 'natural flag')
-                    else:
-                        dataTemp[row][col] = 0
-                    swag = 1
-                    continue
-                # print(absdev, abs(pixel_median - pixel))
-                # if abs(pixel_median - pixel) > rejection_factor:
-                #     data[row][col] = 30 * np.pi
-                #     flaggedPixels += 1
+                # if entryLength == exitLength:
+                #     if abs(pixel_median - pixel) > rejection_factor:
+                #         print('Line 82')
+                #         dataTemp[row][col] = 100
+                #         flaggedPixels += 1
+                #         # print(absdev, abs(pixel - pixel_median), 'natural flag')
+                #     else:
+                #         print('Line 87')
+                #         dataTemp[row][col] = 0
                 #     swag = 1
                 #     continue
 
@@ -126,11 +114,6 @@ def rejectionGenerator(absdev):
     correction = 1 + (1.7 / N)
     i = floor(0.683 * N)
     i_minus = 0.683 * (N - 1)
-    if N < 4:
-        sigma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) * correction
-    else:
-        sigma = (absdev[int(i)] + (absdev[int(i) + 1] - absdev[int(i)]) * (i_minus - floor(i_minus))) * correction
+    sigma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) * correction
     rejection_factor = sigma * sqrt(2) * special.erfinv(1 - (0.5 / N))
-    # print('rejection', rejection_factor)
-    # print('pixel', abs(pixel_median - pixel))
     return rejection_factor
