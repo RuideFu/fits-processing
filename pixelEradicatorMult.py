@@ -5,7 +5,7 @@ from scipy import special
 from numpy import median, floor, sqrt
 
 
-def pixel_eradicator(M, image, image2):
+def pixel_eradicatormult(M, image, image2):
     # read in the images and get their data
     data = image[0].data
     dataTemp = image2[0].data
@@ -30,6 +30,7 @@ def pixel_eradicator(M, image, image2):
             # populate sets with the middle pixel and find the median
             pixel_set.extend(pixel)
             # populate set of absolute deviations
+
             # retrieve the rejection factor from the original absdev set
             swag = 0
             pixel_set = sorted(pixel_set)
@@ -37,19 +38,21 @@ def pixel_eradicator(M, image, image2):
                 pixel_median = median(pixel_set)
                 # populate set of absolute deviations
                 rawDev = (pixel_set - pixel_median)
-                absdev = sorted(abs(rawDev))
+                absdev = abs(rawDev)
+                absdev = sorted(absdev)
                 rejection_factor = rejectionGenerator(absdev)
                 if abs(absdev[-1]) > rejection_factor:
-                    if absdev[-1] == abs(pixel - pixel_median):
+                    if abs(pixel - pixel_median) > rejection_factor:
                         dataTemp[row][col] = 100
                         flaggedPixels += 1
                         swag = 1
                         continue
                     else:
+                        annihilate = []
                         for i in range(len(rawDev)):
-                            if abs(rawDev[i]) == absdev[-1]:
-                                annihilate = i
-                        pixel_set.pop(annihilate)
+                            if abs(rawDev[i]) > rejection_factor:
+                                annihilate.append(i)
+                        pixel_set = [v for i, v in enumerate(pixel_set) if i not in annihilate]
 
                 else:
                     dataTemp[row][col] = 0
