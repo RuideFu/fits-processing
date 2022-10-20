@@ -5,7 +5,7 @@ from scipy import special
 from numpy import median, floor, sqrt
 
 
-def pixel_eradicator(M, image, image2):
+def pixel_eradicatorSDMedian(M, image, image2):
     # read in the images and get their data
     data = image[0].data
     dataTemp = image2[0].data
@@ -32,25 +32,22 @@ def pixel_eradicator(M, image, image2):
             # populate set of absolute deviations
             # retrieve the rejection factor from the original absdev set
             swag = 0
-            pixel_set = sorted(pixel_set)
             while swag == 0:
-                pixel_median = median(pixel_set)
                 # populate set of absolute deviations
-                rawDev = (pixel_set - pixel_median)
-                absdev = sorted(abs(rawDev))
-                rejection_factor = rejectionGenerator(absdev)
-                if abs(absdev[-1]) > rejection_factor:
-                    if absdev[-1] == abs(pixel - pixel_median):
-                        dataTemp[row][col] = 100
-                        flaggedPixels += 1
-                        swag = 1
-                    else:
-                        for i in range(len(rawDev)):
-                            if abs(rawDev[i]) == absdev[-1]:
-                                annihilate = i
-                        pixel_set.pop(annihilate)
-
+                pixelmedian = median(pixel_set)
+                rejection_factor = rejectionGenerator(pixel_set)
+                # print('Set: ', pixel_set, 'Rejection: ', rejection_factor)
+                if abs(pixel - pixelmedian) > rejection_factor:
+                    dataTemp[row][col] = 100
+                    flaggedPixels += 1
+                    swag = 1
                 else:
+                    annihilate = []
+                    for i in range(len(pixel_set)):
+                        if abs(pixel_set[i] - pixelmedian) > rejection_factor:
+                            annihilate.append(i)
+                    pixel_set = [v for i, v in enumerate(pixel_set) if i not in annihilate]
+                if len(annihilate) == 0:
                     dataTemp[row][col] = 0
                     swag = 1
 
@@ -63,14 +60,15 @@ def pixel_eradicator(M, image, image2):
     return [image2]
 
 
-def rejectionGenerator(absdev):
-    N = len(absdev)
+# def rejectionGenerator(pixelSet):
+    # rejection_factor = np.std(pixelSet, ddof=1) * sqrt(2) * special.erfinv(1 - (0.5 / len(pixelSet)))
+    # return rejection_factor
 
+def rejectionGenerator(pixelSet):
+    N = len(pixelSet)
     # now we have the final set to be tested (absdev) we find the rejection factor
-
-    correction = 1 + (1.7 / N)
-    i = floor(0.683 * N)
-    i_minus = 0.683 * (N - 1)
-    sigma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) * correction
+    pixelMedian = median(pixelSet)
+    variance = sum(((x - pixelMedian) * (x - pixelMedian)) for x in pixelSet) / (N - 1)
+    sigma = sqrt(variance)
     rejection_factor = sigma * sqrt(2) * special.erfinv(1 - (0.5 / N))
     return rejection_factor

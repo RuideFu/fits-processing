@@ -12,6 +12,7 @@ def pixel_eradicatormult(M, image, image2):
     row_count = data.shape[0]
     col_count = data.shape[1]
     flaggedPixels = 0
+    lonesurvivors = 0
     # move through each pixel
     for row in range(row_count):
         for col in range(col_count):
@@ -38,15 +39,18 @@ def pixel_eradicatormult(M, image, image2):
                 pixel_median = median(pixel_set)
                 # populate set of absolute deviations
                 rawDev = (pixel_set - pixel_median)
-                absdev = abs(rawDev)
-                absdev = sorted(absdev)
+                absdev = sorted(abs(rawDev))
+                if len(absdev) <= 1:
+                    dataTemp[row][col] = 0
+                    lonesurvivors += 1
+                    swag = 1
+                    continue
                 rejection_factor = rejectionGenerator(absdev)
                 if abs(absdev[-1]) > rejection_factor:
                     if abs(pixel - pixel_median) > rejection_factor:
                         dataTemp[row][col] = 100
                         flaggedPixels += 1
                         swag = 1
-                        continue
                     else:
                         annihilate = []
                         for i in range(len(rawDev)):
@@ -57,23 +61,32 @@ def pixel_eradicatormult(M, image, image2):
                 else:
                     dataTemp[row][col] = 0
                     swag = 1
-                    continue
 
     # Apply new data
     image2[0].data = dataTemp
 
     # percent rejected
     print('Percent pixels rejected: ', flaggedPixels / (2048 * 2064))
-
+    print('Percent lone survivors out of all pixels: ', lonesurvivors / (2048 * 2064))
     return [image2]
 
 
 def rejectionGenerator(absdev):
     N = len(absdev)
 
-    # now we have the final set to be tested (absdev) we find the rejection factor
+    # now we have the final set to be tested (absdev) we find the rejection facto
+    # print(absdev)
+    if N >= 6:
+        correction = 1 + (2.2212 * (N ** (-1.137)))
+    if N == 5:
+        correction = 1.31
+    if N == 4:
+        correction = 1.53
+    if N == 3:
+        correction = 1.59
+    if N == 2:
+        correction = 1.76
 
-    correction = 1 + (1.7 / N)
     i = floor(0.683 * N)
     i_minus = 0.683 * (N - 1)
     sigma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) * correction
