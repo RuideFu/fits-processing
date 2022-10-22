@@ -5,9 +5,11 @@ from scipy import special
 from numpy import sqrt, linspace
 from columnFlagInitial import columnFlagger
 import matplotlib.pyplot as plt
+from pixelEradicatorMult import pixel_eradicatormult
 
 
-def columnLocator(pixelFlaggedImage, f):
+def columnLocator(M, image, image2, f):
+    pixelFlaggedImage = pixel_eradicatormult(M, image, image2, f)
     columnIndexes, mu, sigma, columnVals = columnFlagger(pixelFlaggedImage, f)
     data = pixelFlaggedImage[0].data
     dataTemp = pixelFlaggedImage[0].data * 0

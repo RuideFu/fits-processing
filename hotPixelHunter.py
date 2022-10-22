@@ -6,17 +6,16 @@ from numpy import median, floor, sqrt
 from columnLocator import columnLocator
 from rejectionGenerator import rejectionGenerator
 
-
-def hotPixelHunter(M, image, image2, brokenImage, f):
+def hotPixelHunter(x, M, image, image2, f, p):
     # read in the images and get their data
     # dataFlagged = columnLocator(brokenImage)
-    dataFlagged = brokenImage[0].data
+    dataFlagged = columnLocator(x, image, image2, f)[0].data
     data = image[0].data
     dataTemp = image2[0].data
     row_count = data.shape[0]
     col_count = data.shape[1]
     flaggedPixels = 0
-    rejDeviationFraction = []
+    # rejDeviationFraction = []
     # move through each pixel
     for row in range(row_count):
         for col in range(col_count):
@@ -54,14 +53,14 @@ def hotPixelHunter(M, image, image2, brokenImage, f):
                     dataTemp[row][col] = 0
                     swag = 1
                     continue
-                rejection_factor, sigma = rejectionGenerator(absdev, f)
-                absdevPixel = abs(pixel - pixel_median)
+                rejection_factor, sigma = rejectionGenerator(absdev, p)
+                # absdevPixel = abs(pixel - pixel_median)
                 if abs(absdev[-1]) > rejection_factor:
                     if abs(pixel - pixel_median) > rejection_factor:
                         dataTemp[row][col] = 100
                         flaggedPixels += 1
-                        rejectionDeviation = sigma * sqrt(2) * special.erfinv(1 - (0.5 / (len(absdev))))
-                        rejDeviationFraction.append(absdevPixel / rejectionDeviation)
+                        # rejectionDeviation = sigma * sqrt(2) * special.erfinv(1 - (0.5 / (len(absdev))))
+                        # rejDeviationFraction.append(absdevPixel / rejectionDeviation)
                         swag = 1
                     else:
                         annihilate = []
@@ -76,8 +75,8 @@ def hotPixelHunter(M, image, image2, brokenImage, f):
 
     # Apply new data
     image2[0].data = dataTemp
-    with open('rejectionDeviationM1Hot.txt', 'w') as f:
-        f.write('\n'.join(str(x) for x in rejDeviationFraction))
+    # with open('rejectionDeviationM1Hot.txt', 'w') as f:
+    #     f.write('\n'.join(str(x) for x in rejDeviationFraction))
     # percent rejected
     print('Percent pixels rejected: ', flaggedPixels / (2048 * 2064))
-    return [image2]
+    return image2

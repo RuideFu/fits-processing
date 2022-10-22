@@ -25,6 +25,7 @@ def pixel_eradicatormult(M, image, image2, f):
                 try:
                     pixel_set.append(data[row][col - j])
                 except:
+                    # pixel_set.append(data[row][col - j])
                     continue
                 try:
                     pixel_set.append(data[row][col + j])
@@ -69,7 +70,7 @@ def pixel_eradicatormult(M, image, image2, f):
     print(len(rejDeviationFraction))
     print(flaggedPixels)
     print('Percent pixels rejected: ', flaggedPixels / (2048 * 2064))
-    with open('rejectionDeviationM1Hot.txt', 'w') as f:
+    with open('rejectionDeviationM1.txt', 'w') as f:
         f.write('\n'.join(str(x) for x in rejDeviationFraction))
-    return [image2]
+    return image2
 
