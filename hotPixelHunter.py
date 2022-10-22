@@ -3,10 +3,13 @@ from os import remove
 import numpy as np
 from scipy import special
 from numpy import median, floor, sqrt
+from columnLocator import columnLocator
 
 
-def hotPixelHunter(M, image, image2, ColumnRanges):
+def hotPixelHunter(M, image, image2, brokenImage):
     # read in the images and get their data
+    # dataFlagged = columnLocator(brokenImage)
+    dataFlagged = brokenImage[0].data
     data = image[0].data
     dataTemp = image2[0].data
     row_count = data.shape[0]
@@ -21,31 +24,34 @@ def hotPixelHunter(M, image, image2, ColumnRanges):
             for j in range(0, (2 * M) + 1):
                 for i in range(0, (2 * M) + 1):
                     try:
-                        for m in range(len(ColumnRanges[0])):
-                            for n in range(len(ColumnRanges[0])):
-                                if (col - M) + j == ColumnRanges[m] & ColumnRanges[1, n] < row < ColumnRanges[2, n]:
-                                    continue
-                                else:
-                                    pixel_set.append(data[(row - M) + i][(col - M) + j])
+
+                        if dataFlagged[(row - M) + i][(col - M) + j] == 1:
+                            continue
+                        else:
+                            try:
+                                pixel_set.append(data[(row - M) + i][(col - M) + j])
+                            except:
+                                continue
                     except:
                         continue
             # populate sets with the middle pixel and find the median
             # populate set of absolute deviations
-            
             # retrieve the rejection factor from the original absdev set
             swag = 0
             pixel_set = sorted(pixel_set)
-            print(pixel_set)
             while swag == 0:
-                for i in range(len(ColumnRanges[0])):
-                    for j in range(len(ColumnRanges[0])):
-                        if col == ColumnRanges[0, i] & ColumnRanges[1, j] < row < ColumnRanges[2, j]:
-                            dataTemp[row][col] = 0
-                            swag = 1
+                if dataFlagged[row][col] == 1:
+                    dataTemp[row][col] = 0
+                    swag = 1
+                    continue
                 pixel_median = median(pixel_set)
                 # populate set of absolute deviations
                 rawDev = (pixel_set - pixel_median)
                 absdev = sorted(abs(rawDev))
+                if len(absdev) <= 1:
+                    dataTemp[row][col] = 0
+                    swag = 1
+                    continue
                 rejection_factor = rejectionGenerator(absdev)
                 if abs(absdev[-1]) > rejection_factor:
                     if abs(pixel - pixel_median) > rejection_factor:
@@ -86,7 +92,6 @@ def rejectionGenerator(absdev):
         correction = 1.59
     if N == 2:
         correction = 1.76
-
     i = floor(0.683 * N)
     i_minus = 0.683 * (N - 1)
     sigma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) * correction

@@ -19,26 +19,20 @@ def columnFlagger(image):
 
     medianColVals = median(columnVals)
     absdevColVals = sorted(abs(columnVals - medianColVals))
-    rejectionFactor = rejectionGenerator(absdevColVals)
-
+    rejectionFactor, superSigma = rejectionGenerator(absdevColVals)
     flaggedColumns = np.zeros(col_count)
-
+    flaggedColumnIndexes = []
     for i in range(len(columnVals)):
         if columnVals[i] - medianColVals > rejectionFactor:
-            print('AAAAAAAAA MY BLOOD', i)
-
-            flaggedColumns[i] = 100
+            flaggedColumnIndexes.append(i)
+            flaggedColumns[i] = 1
         else:
             flaggedColumns[i] = 0
-    print(columnVals[2045] - medianColVals, rejectionFactor)
-    for col in range(col_count):
-        for row in range(row_count):
-            # define the M pixels to its left and right
-            data[row][col] = flaggedColumns[col]
-
-    image[0].data = data
-
-    return image
+    # for col in range(col_count):
+    #     for row in range(row_count):
+    #         # define the M pixels to its left and right
+    #         data[row][col] = flaggedColumns[col]
+    return flaggedColumnIndexes, medianColVals, superSigma, columnVals
 
 def rejectionGenerator(absdev):
     N = len(absdev)
@@ -60,4 +54,4 @@ def rejectionGenerator(absdev):
     i_minus = 0.683 * (N - 1)
     sigma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) * correction
     rejection_factor = sigma * sqrt(2) * special.erfinv(1 - (0.5 / N))
-    return rejection_factor
+    return rejection_factor, sigma

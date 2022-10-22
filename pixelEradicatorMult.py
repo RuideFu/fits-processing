@@ -12,7 +12,6 @@ def pixel_eradicatormult(M, image, image2):
     row_count = data.shape[0]
     col_count = data.shape[1]
     flaggedPixels = 0
-    lonesurvivors = 0
     # move through each pixel
     for row in range(row_count):
         for col in range(col_count):
@@ -40,15 +39,10 @@ def pixel_eradicatormult(M, image, image2):
                 # populate set of absolute deviations
                 rawDev = (pixel_set - pixel_median)
                 absdev = sorted(abs(rawDev))
-                if len(absdev) <= 1:
-                    dataTemp[row][col] = 0
-                    lonesurvivors += 1
-                    swag = 1
-                    continue
                 rejection_factor = rejectionGenerator(absdev)
                 if abs(absdev[-1]) > rejection_factor:
                     if abs(pixel - pixel_median) > rejection_factor:
-                        dataTemp[row][col] = 100
+                        dataTemp[row][col] = 1
                         flaggedPixels += 1
                         swag = 1
                     else:
@@ -67,7 +61,6 @@ def pixel_eradicatormult(M, image, image2):
 
     # percent rejected
     print('Percent pixels rejected: ', flaggedPixels / (2048 * 2064))
-    print('Percent lone survivors out of all pixels: ', lonesurvivors / (2048 * 2064))
     return [image2]
 
 
