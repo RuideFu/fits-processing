@@ -4,8 +4,10 @@ import numpy as np
 from scipy import special
 from numpy import median, floor, sqrt
 
+from rejectionGenerator import rejectionGenerator
 
-def columnFlagger(image):
+
+def columnFlagger(image, f):
     # read in the images and get their data
     data = image[0].data
     row_count = data.shape[0]
@@ -19,7 +21,7 @@ def columnFlagger(image):
 
     medianColVals = median(columnVals)
     absdevColVals = sorted(abs(columnVals - medianColVals))
-    rejectionFactor, superSigma = rejectionGenerator(absdevColVals)
+    rejectionFactor, superSigma = rejectionGenerator(absdevColVals, f)
     flaggedColumns = np.zeros(col_count)
     flaggedColumnIndexes = []
     for i in range(len(columnVals)):
@@ -33,25 +35,3 @@ def columnFlagger(image):
     #         # define the M pixels to its left and right
     #         data[row][col] = flaggedColumns[col]
     return flaggedColumnIndexes, medianColVals, superSigma, columnVals
-
-def rejectionGenerator(absdev):
-    N = len(absdev)
-
-    # now we have the final set to be tested (absdev) we find the rejection facto
-    # print(absdev)
-    if N >= 6:
-        correction = 1 + (2.2212 * (N ** (-1.137)))
-    if N == 5:
-        correction = 1.31
-    if N == 4:
-        correction = 1.53
-    if N == 3:
-        correction = 1.59
-    if N == 2:
-        correction = 1.76
-
-    i = floor(0.683 * N)
-    i_minus = 0.683 * (N - 1)
-    sigma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) * correction
-    rejection_factor = sigma * sqrt(2) * special.erfinv(1 - (0.5 / N))
-    return rejection_factor, sigma

@@ -4,8 +4,10 @@ import numpy as np
 from scipy import special
 from numpy import median, floor, sqrt
 
+from rejectionGenerator import rejectionGenerator
 
-def pixel_eradicatormult(M, image, image2):
+
+def pixel_eradicatormult(M, image, image2, f):
     # read in the images and get their data
     data = image[0].data
     dataTemp = image2[0].data
@@ -13,6 +15,7 @@ def pixel_eradicatormult(M, image, image2):
     col_count = data.shape[1]
     flaggedPixels = 0
     # move through each pixel
+    rejDeviationFraction = []
     for row in range(row_count):
         for col in range(col_count):
             pixel = [data[row][col]]
@@ -39,11 +42,14 @@ def pixel_eradicatormult(M, image, image2):
                 # populate set of absolute deviations
                 rawDev = (pixel_set - pixel_median)
                 absdev = sorted(abs(rawDev))
-                rejection_factor = rejectionGenerator(absdev)
+                rejection_factor, sigma = rejectionGenerator(absdev, f)
+                absdevPixel = abs(pixel - pixel_median)
                 if abs(absdev[-1]) > rejection_factor:
                     if abs(pixel - pixel_median) > rejection_factor:
                         dataTemp[row][col] = 1
                         flaggedPixels += 1
+                        rejectionDeviation = sigma * sqrt(2) * special.erfinv(1 - (0.5 / (len(absdev))))
+                        rejDeviationFraction.append(absdevPixel / rejectionDeviation)
                         swag = 1
                     else:
                         annihilate = []
@@ -60,28 +66,10 @@ def pixel_eradicatormult(M, image, image2):
     image2[0].data = dataTemp
 
     # percent rejected
+    print(len(rejDeviationFraction))
+    print(flaggedPixels)
     print('Percent pixels rejected: ', flaggedPixels / (2048 * 2064))
+    with open('rejectionDeviationM1Hot.txt', 'w') as f:
+        f.write('\n'.join(str(x) for x in rejDeviationFraction))
     return [image2]
 
-
-def rejectionGenerator(absdev):
-    N = len(absdev)
-
-    # now we have the final set to be tested (absdev) we find the rejection facto
-    # print(absdev)
-    if N >= 6:
-        correction = 1 + (2.2212 * (N ** (-1.137)))
-    if N == 5:
-        correction = 1.31
-    if N == 4:
-        correction = 1.53
-    if N == 3:
-        correction = 1.59
-    if N == 2:
-        correction = 1.76
-
-    i = floor(0.683 * N)
-    i_minus = 0.683 * (N - 1)
-    sigma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) * correction
-    rejection_factor = sigma * sqrt(2) * special.erfinv(1 - (0.5 / N))
-    return rejection_factor

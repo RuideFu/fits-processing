@@ -7,8 +7,8 @@ from columnFlagInitial import columnFlagger
 import matplotlib.pyplot as plt
 
 
-def columnLocator(pixelFlaggedImage):
-    columnIndexes, mu, sigma, columnVals = columnFlagger(pixelFlaggedImage)
+def columnLocator(pixelFlaggedImage, f):
+    columnIndexes, mu, sigma, columnVals = columnFlagger(pixelFlaggedImage, f)
     data = pixelFlaggedImage[0].data
     dataTemp = pixelFlaggedImage[0].data * 0
     row_count = data.shape[0]
@@ -75,6 +75,7 @@ def columnLocator(pixelFlaggedImage):
             if N_LOW[col] <= row <= N_HIGH[col]:
                 dataTemp[row][columnIndexes[col]] = 1
     #
-    # pixelFlaggedImage[0].data = dataTemp
+    pixelFlaggedImage[0].data = dataTemp
 
-    return dataTemp
+    # return dataTemp
+    return pixelFlaggedImage
