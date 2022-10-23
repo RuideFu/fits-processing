@@ -44,13 +44,13 @@ def pixel_eradicatormult(M, image, image2, f):
                 rawDev = (pixel_set - pixel_median)
                 absdev = sorted(abs(rawDev))
                 rejection_factor, sigma = rejectionGenerator(absdev, f)
-                absdevPixel = abs(pixel - pixel_median)
+                # absdevPixel = abs(pixel - pixel_median)
                 if abs(absdev[-1]) > rejection_factor:
                     if abs(pixel - pixel_median) > rejection_factor:
                         dataTemp[row][col] = 1
                         flaggedPixels += 1
-                        rejectionDeviation = sigma * sqrt(2) * special.erfinv(1 - (0.5 / (len(absdev))))
-                        rejDeviationFraction.append(absdevPixel / rejectionDeviation)
+                        # rejectionDeviation = sigma * sqrt(2) * special.erfinv(1 - (0.5 / (len(absdev))))
+                        # rejDeviationFraction.append(absdevPixel / rejectionDeviation)
                         swag = 1
                     else:
                         annihilate = []
@@ -67,10 +67,6 @@ def pixel_eradicatormult(M, image, image2, f):
     image2[0].data = dataTemp
 
     # percent rejected
-    print(len(rejDeviationFraction))
-    print(flaggedPixels)
     print('Percent pixels rejected: ', flaggedPixels / (2048 * 2064))
-    with open('rejectionDeviationM1.txt', 'w') as f:
-        f.write('\n'.join(str(x) for x in rejDeviationFraction))
     return image2
 

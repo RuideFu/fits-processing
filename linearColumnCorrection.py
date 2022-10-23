@@ -111,8 +111,6 @@ def linearColumnCorrector(badPixels, badColumns, rawImage, templateImage):
                             valCounter = valCounter + 1
                         else:
                             d = d + 1
-                if row == 511 and col == 1157:
-                    print('avg: ', np.average(correctValSet), 'set: ', correctValSet)
                 tempData[row][col] = np.average(correctValSet)
     rawImage[0].data = tempData
     return rawImage
