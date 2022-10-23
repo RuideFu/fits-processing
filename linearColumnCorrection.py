@@ -64,7 +64,7 @@ def linearColumnCorrector(badPixels, badColumns, rawImage, templateImage):
                             for y in testy:
                                 try:
                                     if columnData[row + y][col + x] == 0 and pixelData[row + y][col + x] == 0:
-                                        correctValSet.append(imagedata[row + x][col + y])
+                                        correctValSet.append(imagedata[row + y][col + x])
                                 except:
                                     continue
                         first = 1
@@ -111,7 +111,8 @@ def linearColumnCorrector(badPixels, badColumns, rawImage, templateImage):
                             valCounter = valCounter + 1
                         else:
                             d = d + 1
-
+                if row == 511 and col == 1157:
+                    print('avg: ', np.average(correctValSet), 'set: ', correctValSet)
                 tempData[row][col] = np.average(correctValSet)
     rawImage[0].data = tempData
     return rawImage

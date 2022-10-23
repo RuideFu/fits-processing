@@ -6,10 +6,11 @@ from numpy import median, floor, sqrt
 from columnLocator import columnLocator
 from rejectionGenerator import rejectionGenerator
 
-def hotPixelHunter(x, M, image, image2, f, p):
+
+def hotPixelHunter(pixelFlaggedImage, M, image, image2, f, p):
     # read in the images and get their data
     # dataFlagged = columnLocator(brokenImage)
-    dataFlagged = columnLocator(x, image, image2, f)[0].data
+    dataFlagged = columnLocator(pixelFlaggedImage, f)[0].data
     data = image[0].data
     dataTemp = image2[0].data
     row_count = data.shape[0]

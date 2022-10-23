@@ -5,11 +5,9 @@ from scipy import special
 from numpy import sqrt, linspace
 from columnFlagInitial import columnFlagger
 import matplotlib.pyplot as plt
-from pixelEradicatorMult import pixel_eradicatormult
 
 
-def columnLocator(M, image, image2, f):
-    pixelFlaggedImage = pixel_eradicatormult(M, image, image2, f)
+def columnLocator(pixelFlaggedImage, f):
     columnIndexes, mu, sigma, columnVals = columnFlagger(pixelFlaggedImage, f)
     data = pixelFlaggedImage[0].data
     dataTemp = pixelFlaggedImage[0].data * 0
@@ -41,27 +39,34 @@ def columnLocator(M, image, image2, f):
         N_L = 0
         N_H = N_R - 1
         small = N_R
+
         for i in range(N_R - int(NColMin[p])):
             for j in range(i + int(NColMin[p]) - 1, N_R - 1):
-                if j - i < small:
+                if (j - i + 1) < small:
                     # print('j', j, 'i', i)
-                    x = cdf[p][N_R - 1] - (cdf[p][j] - cdf[p][i])
+                    if i > 0:
+                        x = cdf[p][N_R - 1] - (cdf[p][j] - cdf[p][i])
+                    if i == 0:
+                        x = cdf[p][N_R - 1] - (cdf[p][j])
                     # print('x', x)
-                    muPrime = mu * ((N_R - (j - i)) / N_R)
+                    muPrime = mu * ((N_R - (j - i + 1)) / N_R)
                     # print('mu', muPrime)
-                    sigmaPrime = sigma * sqrt((N_R - (j - i)) / N_R)
+                    sigmaPrime = sigma * ((N_R - (j - i + 1)) / N_R)
                     # print('sugma', sigmaPrime)
                     # print('oof: ', abs(x - muPrime), 'swag: ', sigmaPrime * sqrt(2) * special.erfinv(1 - (0.5 / (N_R - (j - i)))))
-                    if abs(x - muPrime) < sigmaPrime * sqrt(2) * special.erfinv(1 - (0.5 / (N_R - (j - i)))):
+                    if abs(x - muPrime) < sigmaPrime * sqrt(2) * special.erfinv(1 - (0.5 / (N_R - (j - i + 1)))):
                         # print('eeeeee')
-                        small = j - i
+                        small = j - i + 1
                         N_L = i
                         N_H = j
-                if j - i == small:
-                    x = cdf[p][N_R - 1] - (cdf[p][j] - cdf[p][i])
-                    muPrime = mu * ((N_R - (j - i)) / N_R)
-                    sigmaPrime = sigma * sqrt((N_R - (j - i)) / N_R)
-                    if abs(x - muPrime) < sigmaPrime * sqrt(2) * special.erfinv(1 - (0.5 / (N_R - (j - i)))):
+                if j - i + 1 == small:
+                    if i > 0:
+                        x = cdf[p][N_R - 1] - (cdf[p][j] - cdf[p][i])
+                    if i == 0:
+                        x = cdf[p][N_R - 1] - (cdf[p][j])
+                    muPrime = mu * ((N_R - (j - i + 1)) / N_R)
+                    sigmaPrime = sigma * ((N_R - (j - i + 1)) / N_R)
+                    if abs(x - muPrime) < sigmaPrime * sqrt(2) * special.erfinv(1 - (0.5 / (N_R - (j - i + 1)))):
                         if i < N_L:
                             N_L = i
                         if j > N_H:
@@ -79,5 +84,4 @@ def columnLocator(M, image, image2, f):
     #
     pixelFlaggedImage[0].data = dataTemp
 
-    # return dataTemp
     return pixelFlaggedImage
