@@ -84,4 +84,4 @@ def columnLocator(pixelFlaggedImage, f):
     #
     pixelFlaggedImage[0].data = dataTemp
 
-    return pixelFlaggedImage
+    return pixelFlaggedImage, columnIndexes

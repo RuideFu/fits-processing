@@ -10,7 +10,8 @@ from rejectionGenerator import rejectionGenerator
 def hotPixelHunter(pixelFlaggedImage, M, image, image2, f, p):
     # read in the images and get their data
     # dataFlagged = columnLocator(brokenImage)
-    dataFlagged = columnLocator(pixelFlaggedImage, f)[0].data
+    dataFlagged, columnIndexes = columnLocator(pixelFlaggedImage, f)
+    dataFlagged = dataFlagged[0].data
     data = image[0].data
     dataTemp = image2[0].data
     row_count = data.shape[0]
@@ -23,19 +24,45 @@ def hotPixelHunter(pixelFlaggedImage, M, image, image2, f, p):
             pixel = [data[row][col]]
             # define the M pixels to its left and right
             pixel_set = []
+
             for j in range(0, (2 * M) + 1):
                 for i in range(0, (2 * M) + 1):
                     try:
-
-                        if dataFlagged[(row - M) + i][(col - M) + j] == 1:
+                        if dataFlagged[(row - M) + i][(col - M) + j] > 0:
                             continue
                         else:
                             try:
-                                pixel_set.append(data[(row - M) + i][(col - M) + j])
+                                dangerRegion = 0
+                                # keep this for now, later you'll run through like normal, then recalculate for regions
+                                # in flagged columns
+                                for m in columnIndexes:
+                                    if col == m:
+                                        dangerRegion = 1
+                                if dangerRegion == 1:
+                                    if (col - M) + j != col or ((col - M) + j == col and (row - M) + i == row):
+                                        pixel_set.append(data[(row - M) + i][(col - M) + j])
+                                else:
+                                    pixel_set.append(data[(row - M) + i][(col - M) + j])
                             except:
                                 continue
+
                     except:
                         continue
+            if len(pixel_set) == 1:
+                pixel_set = []
+                for i in range(0, (2 * M) + 1):
+                    try:
+                        if dataFlagged[(row - M) + i][col] > 0:
+                            continue
+                        else:
+                            try:
+                                pixel_set.append(data[(row - M) + i][col])
+                            except:
+                                continue
+
+                    except:
+                        continue
+
             # populate sets with the middle pixel and find the median
             # populate set of absolute deviations
             # retrieve the rejection factor from the original absdev set
