@@ -1,6 +1,9 @@
 from numpy import floor, sqrt
 from scipy import special
 
+# this is the robust rejection criterion we use to determine whether or not we reject a pixel from a set
+# important, this needs to use a sorted set of absolute deviations (SORTING FROM LEAST TO GREATEST IS NECESSARY)
+
 
 def rejectionGenerator(absdev, f):
     N = len(absdev)

@@ -1,30 +1,30 @@
-from os import remove
-
-import numpy as np
-from scipy import special
-from numpy import median, floor, sqrt
+from numpy import median
 from columnLocator import columnLocator
 from rejectionGenerator import rejectionGenerator
+# Number 3
+# This is the robust pixel flagging algorithm for finding hot pixels AROUND columns
+# We define sets surrounding the pixel we are analyzing, and do our normal Cheuvanet rejection with those sets
+
+# PixelflaggedImage is the flagged set from pixeleradicatormult, and the other image is the base image
 
 
-def hotPixelHunter(pixelFlaggedImage, M, image, image2, f, p):
+def hotPixelHunter(pixelFlaggedImage, M, image, image2, f, p, dataFlagged, columnIndexes):
     # read in the images and get their data
-    # dataFlagged = columnLocator(brokenImage)
-    dataFlagged, columnIndexes = columnLocator(pixelFlaggedImage, f)
+    # Define the matrix (dataFlagged) that we will use to skip pixels we already flagged as dead columns
+    # dataFlagged, columnIndexes = columnLocator(pixelFlaggedImage, f)
     dataFlagged = dataFlagged[0].data
     data = image[0].data
     dataTemp = image2[0].data
     row_count = data.shape[0]
     col_count = data.shape[1]
     flaggedPixels = 0
-    # rejDeviationFraction = []
     # move through each pixel
     for row in range(row_count):
         for col in range(col_count):
             pixel = [data[row][col]]
-            # define the M pixels to its left and right
             pixel_set = []
-
+            # create sets of pixels surrounding the one we are analyzing, going either 1 or 2 rows out (sets of 8 and 24
+            # pixes surrounding the one we are analyzing)
             for j in range(0, (2 * M) + 1):
                 for i in range(0, (2 * M) + 1):
                     try:
@@ -32,15 +32,17 @@ def hotPixelHunter(pixelFlaggedImage, M, image, image2, f, p):
                             continue
                         else:
                             try:
+                                # determine if we should check if our main pixel is potentially in or around a dead
+                                # column, and append it to the set accordingly
                                 dangerRegion = 0
-                                # keep this for now, later you'll run through like normal, then recalculate for regions
-                                # in flagged columns
                                 for m in columnIndexes:
-                                    if col == m:
+                                    if m - M <= col <= m + M:
                                         dangerRegion = 1
+                                # avoid flagged pixels
                                 if dangerRegion == 1:
                                     if (col - M) + j != col or ((col - M) + j == col and (row - M) + i == row):
                                         pixel_set.append(data[(row - M) + i][(col - M) + j])
+                                # append like normal if not in a bad column
                                 else:
                                     pixel_set.append(data[(row - M) + i][(col - M) + j])
                             except:
@@ -48,6 +50,7 @@ def hotPixelHunter(pixelFlaggedImage, M, image, image2, f, p):
 
                     except:
                         continue
+            # for a special case where the pixel we are analyzing is surrounded by columns and/or on an edge of an image
             if len(pixel_set) == 1:
                 pixel_set = []
                 for i in range(0, (2 * M) + 1):
@@ -66,12 +69,13 @@ def hotPixelHunter(pixelFlaggedImage, M, image, image2, f, p):
             # populate sets with the middle pixel and find the median
             # populate set of absolute deviations
             # retrieve the rejection factor from the original absdev set
-            swag = 0
+            end = 0
             pixel_set = sorted(pixel_set)
-            while swag == 0:
+            while end == 0:
+                # check if our pixel is in a dead column, and skip it if it is
                 if dataFlagged[row][col] == 1:
                     dataTemp[row][col] = 0
-                    swag = 1
+                    end = 1
                     continue
                 pixel_median = median(pixel_set)
                 # populate set of absolute deviations
@@ -79,18 +83,17 @@ def hotPixelHunter(pixelFlaggedImage, M, image, image2, f, p):
                 absdev = sorted(abs(rawDev))
                 if len(absdev) <= 1:
                     dataTemp[row][col] = 0
-                    swag = 1
+                    end = 1
                     continue
+                # define the robust rejection criterion for each set
                 rejection_factor, sigma = rejectionGenerator(absdev, p)
-                # absdevPixel = abs(pixel - pixel_median)
                 if abs(absdev[-1]) > rejection_factor:
                     if abs(pixel - pixel_median) > rejection_factor:
                         dataTemp[row][col] = 100
                         flaggedPixels += 1
-                        # rejectionDeviation = sigma * sqrt(2) * special.erfinv(1 - (0.5 / (len(absdev))))
-                        # rejDeviationFraction.append(absdevPixel / rejectionDeviation)
-                        swag = 1
+                        end = 1
                     else:
+                        # remove the outlying pixels that are not the one we are analyzing from the set, and repeat
                         annihilate = []
                         for i in range(len(rawDev)):
                             if abs(rawDev[i]) > rejection_factor:
@@ -99,12 +102,10 @@ def hotPixelHunter(pixelFlaggedImage, M, image, image2, f, p):
 
                 else:
                     dataTemp[row][col] = 0
-                    swag = 1
+                    end = 1
 
     # Apply new data
     image2[0].data = dataTemp
-    # with open('rejectionDeviationM1Hot.txt', 'w') as f:
-    #     f.write('\n'.join(str(x) for x in rejDeviationFraction))
     # percent rejected
     print('Percent pixels rejected: ', flaggedPixels / (2048 * 2064))
     return image2

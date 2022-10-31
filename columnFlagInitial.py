@@ -6,6 +6,10 @@ from numpy import median, floor, sqrt
 
 from rejectionGenerator import rejectionGenerator
 
+# This locates the indexes bad columns in the image by going through each one and doing a robust rejection the same way
+# as the flagging of pixels in the first robust rejection method
+# The image here is the one produced by flagging pixels in the first robust rejection method
+
 
 def columnFlagger(image, f):
     # read in the images and get their data
@@ -16,9 +20,9 @@ def columnFlagger(image, f):
     columnVals = np.zeros(col_count)
     for col in range(col_count):
         for row in range(row_count):
-            # define the M pixels to its left and right
+            # calculate the number of rejections per column
             columnVals[col] = columnVals[col] + data[row][col]
-
+    # proceed with the normal robust rejection method we have been using
     medianColVals = median(columnVals)
     absdevColVals = sorted(abs(columnVals - medianColVals))
     rejectionFactor, superSigma = rejectionGenerator(absdevColVals, f)
@@ -30,8 +34,4 @@ def columnFlagger(image, f):
             flaggedColumns[i] = 1
         else:
             flaggedColumns[i] = 0
-    # for col in range(col_count):
-    #     for row in range(row_count):
-    #         # define the M pixels to its left and right
-    #         data[row][col] = flaggedColumns[col]
     return flaggedColumnIndexes, medianColVals, superSigma, columnVals

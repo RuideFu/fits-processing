@@ -1,7 +1,9 @@
-from os import remove
 import numpy as np
-from scipy import special
-from numpy import median, floor, sqrt
+# Number 4
+# Uses the hot pixel flagged sets and column flagged sets and corrects the image using the averages of the pixels
+# surrounding it
+# badPixels = hotPixelHunter flagged set, badColumns = columnLocator flagged set, raw and tamplate image are both the
+# raw telescope image
 
 
 def linearColumnCorrector(badPixels, badColumns, rawImage, templateImage):
@@ -20,8 +22,10 @@ def linearColumnCorrector(badPixels, badColumns, rawImage, templateImage):
                 i = 0
                 valCounter = 0
                 while valCounter < 2:
+                    # generate sets of pixels (2 to the right) that are not flagged, to average and replace
+                    # if on an edge, skip
                     if col + i > col_count - 1:
-                        valCounter = 100
+                        valCounter = 2
                         continue
                     if columnData[row][col + i] == 0 and pixelData[row][col + i] == 0:
                         correctValSet.append(imagedata[row][col + i])
@@ -32,8 +36,9 @@ def linearColumnCorrector(badPixels, badColumns, rawImage, templateImage):
                 i = 0
                 valCounter = 0
                 while valCounter < 2:
+                    # find 2 to the left that are not flagged
                     if col - i < 0:
-                        valCounter = 100
+                        valCounter = 2
                         continue
                     if columnData[row][col - i] == 0 and pixelData[row][col - i] == 0:
                         correctValSet.append(imagedata[row][col - i])
@@ -57,6 +62,7 @@ def linearColumnCorrector(badPixels, badColumns, rawImage, templateImage):
                 rightCount = 0
                 testx = [-1, 1]
                 testy = [-1, 1]
+
                 while valCounter < 4:
                     # top center
                     if first == 0:
@@ -68,7 +74,7 @@ def linearColumnCorrector(badPixels, badColumns, rawImage, templateImage):
                                 except:
                                     continue
                         first = 1
-
+                    # if we are on edge cases, make sure we skip them
                     if col - t < 0 and leftCount == 0:
                         valCounter = valCounter + 1
                         leftCount = 1
@@ -81,6 +87,8 @@ def linearColumnCorrector(badPixels, badColumns, rawImage, templateImage):
                     if row + w > row_count - 1 and topCount == 0:
                         valCounter = valCounter + 1
                         topCount = 1
+
+                    # Now if possible step though and find all the pixels we can add to our set to average
                     if botCount == 0:
                         if columnData[row - i][col] == 0 and pixelData[row - i][col] == 0:
                             correctValSet.append(imagedata[row - i][col])
