@@ -106,6 +106,7 @@ def hotPixelHunter(pixelFlaggedImage, M, image, image2, f, p, dataFlagged, colum
 
     # Apply new data
     image2[0].data = dataTemp
+    badPixels = image2
     # percent rejected
     print('Percent pixels rejected: ', flaggedPixels / (2048 * 2064))
-    return image2
+    return badPixels

@@ -23,13 +23,26 @@ def pixel_linearmult(M, image, image2, f):
             pixel_set = []
             for j in range(1, M + 1):
                 try:
-                    pixel_set.append(data[row][col - j])
+                    if (col - j) >= 0:
+                        pixel_set.append(data[row][col - j])
                 except:
                     continue
                 try:
                     pixel_set.append(data[row][col + j])
                 except:
                     continue
+            # for edge cases
+            if len(pixel_set) < (2 * M):
+                # find out how many are missing
+                missing = (2 * M) - len(pixel_set)
+                # for cases on the right side
+                if col > col_count / 2:
+                    for x in range(missing):
+                        pixel_set.append((col - (M + 1)) - x)
+                # cases on the left side
+                else:
+                    for x in range(missing):
+                        pixel_set.append((col + (M + 1)) + x)
             # populate sets with the middle pixel and find the median
             pixel_set.extend(pixel)
 

@@ -1,8 +1,4 @@
-from os import remove
-
-import numpy as np
-from scipy import special
-from numpy import median, floor, sqrt
+from numpy import median, zeros
 
 from rejectionGenerator import rejectionGenerator
 
@@ -17,7 +13,7 @@ def columnFlagger(image, f):
     row_count = data.shape[0]
     col_count = data.shape[1]
     # move through each pixel
-    columnVals = np.zeros(col_count)
+    columnVals = zeros(col_count)
     for col in range(col_count):
         for row in range(row_count):
             # calculate the number of rejections per column
@@ -26,7 +22,7 @@ def columnFlagger(image, f):
     medianColVals = median(columnVals)
     absdevColVals = sorted(abs(columnVals - medianColVals))
     rejectionFactor, superSigma = rejectionGenerator(absdevColVals, f)
-    flaggedColumns = np.zeros(col_count)
+    flaggedColumns = zeros(col_count)
     flaggedColumnIndexes = []
     for i in range(len(columnVals)):
         if columnVals[i] - medianColVals > rejectionFactor:
