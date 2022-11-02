@@ -21,8 +21,8 @@ def columnLocator(pixelFlaggedImage, f):
     # make a list of the number of rejected pixels in each flagged column
     for i in range(len(columnIndexes)):
         NColBase[i] = columnVals[(columnIndexes[i])]
-    NColMin = np.zeros(len(NColBase))
-    for i in range(len(NColBase)):
+    NColMin = np.zeros(len(columnIndexes))
+    for i in range(len(columnIndexes)):
         NColMin[i] = (N_R * ((NColBase[i] - mu) / (N_R - mu)))
     # find the cdf for each broken column
     flaggedColData = np.zeros((len(columnIndexes), N_R))
@@ -38,7 +38,7 @@ def columnLocator(pixelFlaggedImage, f):
     N_LOW = []
     N_HIGH = []
     # define the columns we will be analyzing
-    for p in range(len(NColMin)):
+    for p in range(len(columnIndexes)):
         N_L = 0
         N_H = N_R - 1
         small = N_R
