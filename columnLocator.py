@@ -42,34 +42,35 @@ def columnLocator(pixelFlaggedImage, f):
         N_L = 0
         N_H = N_R - 1
         small = N_R
-
-        for i in range(N_R - int(NColMin[p])):
-            for j in range(i + int(NColMin[p]) - 1, N_R - 1):
-                if (j - i + 1) < small:
-                    if i > 0:
-                        x = cdf[p][N_R - 1] - (cdf[p][j] - cdf[p][i])
-                    if i == 0:
-                        x = cdf[p][N_R - 1] - (cdf[p][j])
-                    muPrime = mu * ((N_R - (j - i + 1)) / N_R)
-                    sigmaPrime = sigma * ((N_R - (j - i + 1)) / N_R)
-                    if abs(x - muPrime) < sigmaPrime * sqrt(2) * special.erfinv(1 - (0.5 / (N_R - (j - i + 1)))):
-                        small = j - i + 1
-                        N_L = i
-                        N_H = j
-                if j - i + 1 == small:
-                    if i > 0:
-                        x = cdf[p][N_R - 1] - (cdf[p][j] - cdf[p][i])
-                    if i == 0:
-                        x = cdf[p][N_R - 1] - (cdf[p][j])
-                    muPrime = mu * ((N_R - (j - i + 1)) / N_R)
-                    sigmaPrime = sigma * ((N_R - (j - i + 1)) / N_R)
-                    if abs(x - muPrime) < sigmaPrime * sqrt(2) * special.erfinv(1 - (0.5 / (N_R - (j - i + 1)))):
-                        if i < N_L:
+        # ensure that columns are not flagged for having too few flagged pixels
+        if columnVals[(columnIndexes[p])] > mu:
+            for i in range(N_R - int(NColMin[p])):
+                for j in range(i + int(NColMin[p]) - 1, N_R - 1):
+                    if (j - i + 1) < small:
+                        if i > 0:
+                            x = cdf[p][N_R - 1] - (cdf[p][j] - cdf[p][i])
+                        if i == 0:
+                            x = cdf[p][N_R - 1] - (cdf[p][j])
+                        muPrime = mu * ((N_R - (j - i + 1)) / N_R)
+                        sigmaPrime = sigma * ((N_R - (j - i + 1)) / N_R)
+                        if abs(x - muPrime) < sigmaPrime * sqrt(2) * special.erfinv(1 - (0.5 / (N_R - (j - i + 1)))):
+                            small = j - i + 1
                             N_L = i
-                        if j > N_H:
                             N_H = j
-        N_LOW.append(N_L)
-        N_HIGH.append(N_H)
+                    if j - i + 1 == small:
+                        if i > 0:
+                            x = cdf[p][N_R - 1] - (cdf[p][j] - cdf[p][i])
+                        if i == 0:
+                            x = cdf[p][N_R - 1] - (cdf[p][j])
+                        muPrime = mu * ((N_R - (j - i + 1)) / N_R)
+                        sigmaPrime = sigma * ((N_R - (j - i + 1)) / N_R)
+                        if abs(x - muPrime) < sigmaPrime * sqrt(2) * special.erfinv(1 - (0.5 / (N_R - (j - i + 1)))):
+                            if i < N_L:
+                                N_L = i
+                            if j > N_H:
+                                N_H = j
+            N_LOW.append(N_L)
+            N_HIGH.append(N_H)
     # flag the columns based on the regions we just found for each
     for row in range(row_count):
         for col in range(len(columnIndexes)):

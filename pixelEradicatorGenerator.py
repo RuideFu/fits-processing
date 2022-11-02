@@ -26,7 +26,7 @@ imagePixel = fits.open('Number1.fits')
 # output1.writeto("Number1.fits", overwrite=True)
 # output2.writeto("swagger.fits", overwrite=True)
 # output3.writeto("Number3_3.fits", overwrite=True)
-output4.writeto("Number2.fits", overwrite=True)
+output4.writeto("Number2_1.fits", overwrite=True)
 # output5.writeto("Number4_3.fits", overwrite=True)
 # close the image
 image.close()
