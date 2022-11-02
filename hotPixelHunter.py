@@ -1,6 +1,7 @@
 from numpy import median
-from columnLocator import columnLocator
 from rejectionGenerator import rejectionGenerator
+
+
 # Number 3
 # This is the robust pixel flagging algorithm for finding hot pixels AROUND columns
 # We define sets surrounding the pixel we are analyzing, and do our normal Cheuvanet rejection with those sets
@@ -11,6 +12,9 @@ from rejectionGenerator import rejectionGenerator
 def hotPixelHunter(pixelFlaggedImage, M, image, image2, f, p, dataFlagged, columnIndexes):
     # read in the images and get their data
     # Define the matrix (dataFlagged) that we will use to skip pixels we already flagged as dead columns
+    # keeping this here as a reference if we need to change, (linear) pixelFlaggedImage and f can be used with the line
+    # below to find the indexes of the columns we need, but I've chosen to skip that and have the output of
+    # columnLocator be an input for this function (dataFlagged), let me know if you want this changed
     # dataFlagged, columnIndexes = columnLocator(pixelFlaggedImage, f)
     dataFlagged = dataFlagged[0].data
     data = image[0].data
