@@ -1,5 +1,5 @@
 from numpy import median
-from rejectionGenerator import rejectionGenerator
+from rejectionGenerator import rejectionGeneratorFinal
 
 
 # Number 1
@@ -8,7 +8,7 @@ from rejectionGenerator import rejectionGenerator
 # some reason
 
 
-def pixel_linearmult(M, image, image2, f):
+def pixel_linearmult(M, image, image2, nu):
     # read in the images and get their data
     data = image[0].data
     dataTemp = image2[0].data
@@ -56,7 +56,9 @@ def pixel_linearmult(M, image, image2, f):
                 rawDev = (pixel_set - pixel_median)
                 absdev = sorted(abs(rawDev))
                 # define the
-                rejection_factor, sigma = rejectionGenerator(absdev, f)
+                # tests to the rejection factor using lorentzians
+                # rejection_factor, sigma = rejectionGenerator(absdev, f)
+                rejection_factor, sigma = rejectionGeneratorFinal(absdev, nu)
                 # check if the largest pixel deviation is outlying
                 if abs(absdev[-1]) > rejection_factor:
                     # reject the main pixel if it's too big, flag, and end the loop

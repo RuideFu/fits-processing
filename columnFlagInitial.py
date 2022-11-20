@@ -1,6 +1,6 @@
 from numpy import median, zeros
 
-from rejectionGenerator import rejectionGenerator
+from rejectionGenerator import rejectionGeneratorFinal
 
 # This locates the indexes bad columns in the image by going through each one and doing a robust rejection the same way
 # as the flagging of pixels in the first robust rejection method

@@ -1,5 +1,5 @@
 from numpy import median
-from rejectionGenerator import rejectionGenerator
+from rejectionGenerator import rejectionGeneratorFinal
 
 
 # Number 3
