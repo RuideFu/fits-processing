@@ -60,6 +60,12 @@ def pixel_linearmult(M, image, image2, nu):
                 # rejection_factor, sigma = rejectionGenerator(absdev, f)
                 rejection_factor, sigma = rejectionGeneratorFinal(absdev, nu)
                 # check if the largest pixel deviation is outlying
+                if len(absdev) == 1:
+                    print('doodoo')
+                    dataTemp[row][col] = 0
+                    end = 1
+                    continue
+
                 if abs(absdev[-1]) > rejection_factor:
                     # reject the main pixel if it's too big, flag, and end the loop
                     if abs(pixel - pixel_median) > rejection_factor:
