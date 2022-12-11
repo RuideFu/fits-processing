@@ -11,10 +11,10 @@ linearPixelFlaggedImage = pixel_linearmult(10, image, image2, 0)
 imagePixelFlag = linearPixelFlaggedImage
 image = fits.open('brokenColumnP6.fits')
 image2 = fits.open('brokenColumnP6.fits')
-badPixels, dataFlagged = hotPixelHunter(linearPixelFlaggedImage, 2, image, image2, 4)
+badPixels, badColumns = hotPixelHunter(linearPixelFlaggedImage, 2, image, image2, 4)
 image = fits.open('brokenColumnP6.fits')
 image2 = fits.open('brokenColumnP6.fits')
-[output1] = linearColumnCorrector(badPixels, dataFlagged, image, image2)
+[output1] = linearColumnCorrector(badPixels, badColumns, image, image2)
 output1.writeto("FinalFull.fits", overwrite=True)
 
 image.close()

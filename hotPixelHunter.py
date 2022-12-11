@@ -13,12 +13,12 @@ from rejectionGenerator import rejectionGeneratorFinal
 
 def hotPixelHunter(linearPixelFlaggedImage, M, image, image2, nu):
     # read in the images and get their data
-    # Define the matrix (dataFlagged) that we will use to skip pixels we already flagged as dead columns
+    # Define the matrix (badColumns) that we will use to skip pixels we already flagged as dead columns
     # keeping this here as a reference if we need to change, (linear) pixelFlaggedImage and f can be used with the line
     # below to find the indexes of the columns we need, but I've chosen to skip that and have the output of
-    # columnLocator be an input for this function (dataFlagged), let me know if you want this changed
-    dataFlagged, columnIndexes = columnLocator(linearPixelFlaggedImage)
-    dataFlagged = dataFlagged[0].data
+    # columnLocator be an input for this function (badColumns), let me know if you want this changed
+    badColumns, columnIndexes = columnLocator(linearPixelFlaggedImage)
+    badColumns = badColumns[0].data
     data = image[0].data
     dataTemp = image2[0].data
     row_count = data.shape[0]
@@ -34,7 +34,7 @@ def hotPixelHunter(linearPixelFlaggedImage, M, image, image2, nu):
             for j in range(0, (2 * M) + 1):
                 for i in range(0, (2 * M) + 1):
                     try:
-                        if dataFlagged[(row - M) + i][(col - M) + j] > 0:
+                        if badColumns[(row - M) + i][(col - M) + j] > 0:
                             continue
                         else:
                             try:
@@ -61,7 +61,7 @@ def hotPixelHunter(linearPixelFlaggedImage, M, image, image2, nu):
                 pixel_set = []
                 for i in range(0, (2 * M) + 1):
                     try:
-                        if dataFlagged[(row - M) + i][col] > 0:
+                        if badColumns[(row - M) + i][col] > 0:
                             continue
                         else:
                             try:
@@ -79,7 +79,7 @@ def hotPixelHunter(linearPixelFlaggedImage, M, image, image2, nu):
             pixel_set = sorted(pixel_set)
             while end == 0:
                 # check if our pixel is in a dead column, and skip it if it is
-                if dataFlagged[row][col] == 1:
+                if badColumns[row][col] == 1:
                     dataTemp[row][col] = 0
                     end = 1
                     continue
@@ -115,6 +115,6 @@ def hotPixelHunter(linearPixelFlaggedImage, M, image, image2, nu):
     badPixels = image2
     # percent rejected
     print('Percent pixels rejected: ', flaggedPixels / (2048 * 2064))
-    # Will want to return dataFlagged here too, for use in linearColumnCorrection.py
-    # dataFlagged is the flagged column ranges
-    return badPixels, dataFlagged
+    # Will want to return badColumns here too, for use in linearColumnCorrection.py
+    # badColumns is the flagged column ranges
+    return badPixels, badColumns

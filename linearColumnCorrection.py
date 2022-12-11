@@ -9,7 +9,7 @@ import numpy as np
 def linearColumnCorrector(hotPixelFlaggedImage, flaggedColumnRanges, rawImage, templateImage):
     imagedata = rawImage[0].data
     pixelData = hotPixelFlaggedImage[0].data
-    columnData = flaggedColumnRanges[0].data
+    columnData = flaggedColumnRanges
     tempData = templateImage[0].data
 
     row_count = imagedata.shape[0]
