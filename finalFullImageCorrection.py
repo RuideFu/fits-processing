@@ -3,7 +3,8 @@ from columnLocator import columnLocator
 from hotPixelHunter import hotPixelHunter
 from linearColumnCorrection import linearColumnCorrector
 from pixelEradicatorMult import pixel_linearmult
-
+import time
+start = time.time()
 image = fits.open('brokenColumnP6.fits')
 image2 = fits.open('brokenColumnP6.fits')
 linearPixelFlaggedImage = pixel_linearmult(10, image, image2, 0)
@@ -18,3 +19,5 @@ image2 = fits.open('brokenColumnP6.fits')
 output1.writeto("FinalFull.fits", overwrite=True)
 
 image.close()
+end = time.time()
+print("This took: ", end - start, " seconds")
