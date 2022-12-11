@@ -6,13 +6,12 @@ from pixelEradicatorMult import pixel_linearmult
 
 image = fits.open('brokenColumnP6.fits')
 image2 = fits.open('brokenColumnP6.fits')
-linearPixelFlaggedImage = pixel_linearmult(10, image, image2, 1)
+linearPixelFlaggedImage = pixel_linearmult(10, image, image2, 0)
 # have to restate image, image2 and create an alias from linearPixelFlaggedImage so that nothing is overwritten
 imagePixelFlag = linearPixelFlaggedImage
-dataFlagged, columnIndexes = columnLocator(imagePixelFlag, 1)
 image = fits.open('brokenColumnP6.fits')
 image2 = fits.open('brokenColumnP6.fits')
-badPixels = hotPixelHunter(linearPixelFlaggedImage, 2, image, image2, 1, 1, dataFlagged, columnIndexes)
+badPixels, dataFlagged = hotPixelHunter(linearPixelFlaggedImage, 2, image, image2, 4)
 image = fits.open('brokenColumnP6.fits')
 image2 = fits.open('brokenColumnP6.fits')
 [output1] = linearColumnCorrector(badPixels, dataFlagged, image, image2)

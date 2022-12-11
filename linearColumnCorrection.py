@@ -6,10 +6,10 @@ import numpy as np
 # raw telescope image
 
 
-def linearColumnCorrector(badPixels, badColumns, rawImage, templateImage):
+def linearColumnCorrector(hotPixelFlaggedImage, flaggedColumnRanges, rawImage, templateImage):
     imagedata = rawImage[0].data
-    pixelData = badPixels[0].data
-    columnData = badColumns[0].data
+    pixelData = hotPixelFlaggedImage[0].data
+    columnData = flaggedColumnRanges[0].data
     tempData = templateImage[0].data
 
     row_count = imagedata.shape[0]

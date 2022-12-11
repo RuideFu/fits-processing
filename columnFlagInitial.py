@@ -7,7 +7,7 @@ from rejectionGenerator import rejectionGeneratorFinal
 # The image here is the one produced by flagging pixels in the first robust rejection method
 
 
-def columnFlagger(image, f):
+def columnFlagger(image):
     # read in the images and get their data
     data = image[0].data
     row_count = data.shape[0]
@@ -21,7 +21,7 @@ def columnFlagger(image, f):
     # proceed with the normal robust rejection method we have been using
     medianColVals = median(columnVals)
     absdevColVals = sorted(abs(columnVals - medianColVals))
-    rejectionFactor, superSigma = rejectionGenerator(absdevColVals, f)
+    rejectionFactor, superSigma = rejectionGeneratorFinal(absdevColVals, 0)
     flaggedColumns = zeros(col_count)
     flaggedColumnIndexes = []
     for i in range(len(columnVals)):

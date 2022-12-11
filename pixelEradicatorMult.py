@@ -15,6 +15,9 @@ def pixel_linearmult(M, image, image2, nu):
     row_count = data.shape[0]
     col_count = data.shape[1]
     flaggedPixels = 0
+    lenAbsdev1 = 0
+    lenAbsdev2 = 0
+    totalcount = 0
     # move through each pixel
     for row in range(row_count):
         for col in range(col_count):
@@ -61,8 +64,9 @@ def pixel_linearmult(M, image, image2, nu):
                 rejection_factor, sigma = rejectionGeneratorFinal(absdev, nu)
                 # check if the largest pixel deviation is outlying
                 if len(absdev) == 1:
-                    print('doodoo')
+                    lenAbsdev1 += 1
                     dataTemp[row][col] = 0
+                    totalcount += 1
                     end = 1
                     continue
 
@@ -71,6 +75,9 @@ def pixel_linearmult(M, image, image2, nu):
                     if abs(pixel - pixel_median) > rejection_factor:
                         dataTemp[row][col] = 1
                         flaggedPixels += 1
+                        totalcount += 1
+                        if len(absdev) == 2:
+                            lenAbsdev2 += 1
                         end = 1
                     # if not remove the outlying pixels from this set that were not the main pixel, and repeat
                     else:
@@ -82,11 +89,18 @@ def pixel_linearmult(M, image, image2, nu):
                 # if no more rejections no pixel is flagged and the loop ends
                 else:
                     dataTemp[row][col] = 0
+                    totalcount += 1
+                    if len(absdev) == 2:
+                        lenAbsdev2 += 1
                     end = 1
 
     # Apply new data
     image2[0].data = dataTemp
 
     # percent rejected
+    print('Absdev Length = 1 cases: ', lenAbsdev1)
+    print('Absdev Length = 2 cases: ', lenAbsdev2)
     print('Percent pixels rejected: ', flaggedPixels / (2048 * 2064))
+    print('Total Pixel Count: ', totalcount)
+
     return image2

@@ -1,4 +1,6 @@
 from numpy import median
+
+from columnLocator import columnLocator
 from rejectionGenerator import rejectionGeneratorFinal
 
 
@@ -9,13 +11,13 @@ from rejectionGenerator import rejectionGeneratorFinal
 # PixelflaggedImage is the flagged set from pixeleradicatormult, and the other image is the base image
 
 
-def hotPixelHunter(pixelFlaggedImage, M, image, image2, f, p, dataFlagged, columnIndexes):
+def hotPixelHunter(linearPixelFlaggedImage, M, image, image2, nu):
     # read in the images and get their data
     # Define the matrix (dataFlagged) that we will use to skip pixels we already flagged as dead columns
     # keeping this here as a reference if we need to change, (linear) pixelFlaggedImage and f can be used with the line
     # below to find the indexes of the columns we need, but I've chosen to skip that and have the output of
     # columnLocator be an input for this function (dataFlagged), let me know if you want this changed
-    # dataFlagged, columnIndexes = columnLocator(pixelFlaggedImage, f)
+    dataFlagged, columnIndexes = columnLocator(linearPixelFlaggedImage)
     dataFlagged = dataFlagged[0].data
     data = image[0].data
     dataTemp = image2[0].data
@@ -90,7 +92,7 @@ def hotPixelHunter(pixelFlaggedImage, M, image, image2, f, p, dataFlagged, colum
                     end = 1
                     continue
                 # define the robust rejection criterion for each set
-                rejection_factor, sigma = rejectionGenerator(absdev, p)
+                rejection_factor, sigma = rejectionGeneratorFinal(absdev, nu)
                 if abs(absdev[-1]) > rejection_factor:
                     if abs(pixel - pixel_median) > rejection_factor:
                         dataTemp[row][col] = 100
@@ -113,4 +115,6 @@ def hotPixelHunter(pixelFlaggedImage, M, image, image2, f, p, dataFlagged, colum
     badPixels = image2
     # percent rejected
     print('Percent pixels rejected: ', flaggedPixels / (2048 * 2064))
-    return badPixels
+    # Will want to return dataFlagged here too, for use in linearColumnCorrection.py
+    # dataFlagged is the flagged column ranges
+    return badPixels, dataFlagged

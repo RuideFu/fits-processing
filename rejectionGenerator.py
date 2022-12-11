@@ -5,6 +5,8 @@ from scipy import special
 # this is the robust rejection criterion we use to determine whether or not we reject a pixel from a set
 # important, this needs to use a sorted set of absolute deviations (SORTING FROM LEAST TO GREATEST IS NECESSARY)
 
+# nu choices relate to the student t-test: 1 being closest to lorentizian and inf being gaussian
+# nu == 0 is gaussian one
 
 def rejectionGeneratorFinal(absdev, nu):
     N = len(absdev)
@@ -18,31 +20,31 @@ def rejectionGeneratorFinal(absdev, nu):
         correction = 1.59
     if N == 2:
         correction = 1.76
-    # if N == 1:
-    #     correction = 0
+    if N == 1:
+        correction = 0
     if nu == 0:
         i = floor(0.683 * N)
         i_minus = 0.683 * (N - 1)
-        gamma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) # * correction
+        gamma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) * correction
         rejectionFactor = gamma * sqrt(2) * special.erfinv(1 - (0.5 / N))
 
     if nu == 1:
         i = floor(0.5 * N)
         i_minus = 0.5 * (N - 1)
-        gamma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) # * correction
+        gamma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) * correction
         rejectionFactor = gamma * tan(pi * (0.5 - (0.25 / N)))
 
     if nu == 2:
         i = floor(0.577 * N)
         i_minus = 0.577 * (N - 1)
-        gamma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) # * correction
+        gamma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) * correction
         alpha = (1 - 0.25 / N) / N
         rejectionFactor = gamma * 2 * (0.5 - (0.25 / N)) * sqrt(2 / alpha)
 
     if nu == 4:
         i = floor(0.626 * N)
         i_minus = 0.626 * (N - 1)
-        gamma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) # * correction
+        gamma = (absdev[int(i) - 1] + (absdev[int(i)] - absdev[int(i) - 1]) * (i_minus - floor(i_minus))) * correction
         alpha = (1 - 0.25 / N) / N
         q = cos(1 / 3 * arccos(sqrt(alpha))) / sqrt(alpha)
         rejectionFactor = gamma * 2 * sqrt(q - 1)
